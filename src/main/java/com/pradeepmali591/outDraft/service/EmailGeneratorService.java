@@ -1,4 +1,9 @@
 package com.pradeepmali591.outDraft.service;
 
-public class EmailGeneratorService {
+import com.pradeepmali591.outDraft.dto.EmailRequest;
+
+public interface EmailGeneratorService {
+
+
+    String generateEmailReply(EmailRequest request);
 }
