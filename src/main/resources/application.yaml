@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: outDraft
+
+server:
+  port: 8081
