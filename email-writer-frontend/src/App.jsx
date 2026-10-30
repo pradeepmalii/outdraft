@@ -1,121 +1,110 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+
+import { Box, Container, Typography, TextField, FormControl, InputLabel, MenuItem, Select, Button,  CircularProgress } from '@mui/material';
+import axios from 'axios';
 import './App.css'
+import { useState } from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
+const [emailContent, setEmailContent] = useState('');
+const [tone, setTone] = useState('');
+const [generatedReply, setGeneratedReply] = useState('');
+const [loading, setLoading] = useState(false);
+
+const handleSubmit = async () => {
+  setLoading(true);
+
+  try {
+    console.log("Sending request...");
+    console.log("Email Content:", emailContent);
+    console.log("Tone:", tone);
+
+    const response = await axios.post(
+      "http://localhost:8081/api/email/generate",
+      {
+        emailContent,
+        tone
+      }
+    );
+
+    console.log("API Response:", response.data);
+
+    setGeneratedReply(
+      typeof response.data === 'string'
+        ? response.data
+        : JSON.stringify(response.data)
+    );
+
+  } catch (error) {
+    console.error("Error generating reply:", error);
+    setGeneratedReply("Failed to generate reply. Check the console.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Container maxWidth="md" sx={{py:4}}>
+      <Typography variant='h3' component="h1" gutterBottom>
+        Email Reply Generator 
+      </Typography>
 
-      <div className="ticks"></div>
+      <Box sx={{mx: 3}}>
+        <TextField
+          fullWidth
+          multiline
+          rows={6}
+          variant='outlined'
+          label="Original Email Content"
+          value={emailContent || ''}
+          onChange={(e) => setEmailContent(e.target.value)}
+          sx={{mb:2}}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <FormControl fullWidth sx={{mb:2}}>
+          <InputLabel>Tone(optional)</InputLabel>
+          <Select
+            
+            value={tone || ''}
+            label="Tone(optional)"
+            onChange={(e) => setTone(e.target.value)}
+          >
+            <MenuItem value="">None</MenuItem>
+            <MenuItem value="professional">Professional</MenuItem>
+            <MenuItem value="casual">Casual</MenuItem>
+            <MenuItem value="friendly">Friendly</MenuItem>
+          </Select>
+        </FormControl>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <Button variant="contained" 
+        sx={{mb:2}}
+        onClick={handleSubmit}
+        disabled = {!emailContent || loading}>
+          {loading ? <CircularProgress size={24}/> : "Generate Reply"}
+        
+        </Button>
+
+      </Box>
+
+      <Box sx={{mx: 3}}>
+        <TextField
+          fullWidth
+          multiline
+          rows={6}
+          variant='outlined'
+          value={generatedReply || ''}
+          slotProps={{readOnly: true}}
+          sx={{mb:2}}
+        />
+
+        <Button variant="outlined" 
+        onClick={() => navigator.clipboard.write(generatedReply)}>
+          Copy to Clipboard
+        </Button>
+
+
+        </Box>
+
+    </Container>
   )
 }
 
